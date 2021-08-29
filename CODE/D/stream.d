@@ -315,7 +315,7 @@ class STREAM
 
     // ~~
 
-    void WriteField( _VALUE_ )(
+    void WriteArrayField( _VALUE_ )(
         string name,
         ref _VALUE_[] value_array
         )
@@ -333,9 +333,9 @@ class STREAM
 
     // ~~
 
-    void WriteField( _KEY_, _VALUE_ )(
+    void WriteMapField( _KEY_, _VALUE_ )(
         string name,
-        ref _VALUE_[ _KEY_ ] value_dictionary
+        ref _VALUE_[ _KEY_ ] value_map
         )
     {
         _KEY_
@@ -344,9 +344,9 @@ class STREAM
             written_value;
 
         WriteFieldHeader( name );
-        WriteNatural64( ulong( value_dictionary.length ) );
+        WriteNatural64( ulong( value_map.length ) );
 
-        foreach ( key, value; value_dictionary )
+        foreach ( key, value; value_map )
         {
             written_key = key;
             written_key.WriteValue( this );
@@ -657,7 +657,7 @@ class STREAM
 
     // ~~
 
-    bool ReadField( _VALUE_ )(
+    bool ReadArrayField( _VALUE_ )(
         string name,
         ref _VALUE_[] value_array
         )
@@ -670,7 +670,7 @@ class STREAM
         if ( ReadFieldHeader( name ) )
         {
             value_count = ReadNatural64();
-            value_array.clear();
+            value_array = null;
             value_array.reserve( value_count );
 
             foreach ( value_index; 0 .. value_count )
@@ -696,9 +696,9 @@ class STREAM
 
     // ~~
 
-    bool ReadField( _KEY_, _VALUE_ )(
+    bool ReadMapField( _KEY_, _VALUE_ )(
         string name,
-        ref _VALUE_[ _KEY_ ] value_dictionary
+        ref _VALUE_[ _KEY_ ] value_map
         )
     {
         _KEY_
@@ -711,8 +711,7 @@ class STREAM
         if ( ReadFieldHeader( name ) )
         {
             value_count = ReadNatural64();
-            value_dictionary.clear();
-            value_dictionary.reserve( value_count );
+            value_map = null;
 
             foreach ( value_index; 0 .. value_count )
             {
@@ -729,7 +728,7 @@ class STREAM
                 }
 
                 value.ReadValue( this );
-                value_dictionary[ key ] = value;
+                value_map[ key ] = value;
             }
 
             ReadFieldFooter();

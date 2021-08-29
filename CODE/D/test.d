@@ -5,6 +5,7 @@ import bif.stream;
 import bif.stream_field;
 import bif.stream_state;
 import std.stdio : write, writeln;
+import std.conv : to;
 
 // -- TYPES
 
@@ -71,6 +72,18 @@ class OBJECT
         Integer64 = cast( long )value;
         Real32 = cast( float )value;
         Real64 = cast( double )value;
+        Text = value.to!string();
+        TextArray = [ value.to!string(), ( value + 1 ).to!string() ];
+        TextMap[ value ] = value.to!string();
+        TextMap[ value + 1 ] = ( value + 1 ).to!string();
+        Color.Red = cas( ubyte )value;
+        Color.Green = cast( ubyte )( value + 1 );
+        Color.Blue = cast( ubyte )( value + 2 );
+        Color.Alpha = cast( ubyte )( value + 3 );
+        ColorArray = [ Color, Color ];
+        ColorMap[ value ] = Color;
+        ColorMap[ value + 1 ] = Color;
+
     }
 
     // -- INQUIRIES
@@ -114,14 +127,12 @@ class OBJECT
         stream.WriteField( "Integer64:long", Integer64 );
         stream.WriteField( "Real32:float", Real32 );
         stream.WriteField( "Real64:double", Real64 );
-        /*
         stream.WriteField( "Text:string", Text );
-        stream.WriteField( "TextArray:string[]", TextArray );
-        stream.WriteField( "TextMap:string[long]", TextMap );
+        stream.WriteArrayField( "TextArray:string[]", TextArray );
+        stream.WriteMapField( "TextMap:string[long]", TextMap );
         stream.WriteField( "Color:COLOR", Color );
-        stream.WriteField( "ColorArray:COLOR[]", ColorArray );
-        stream.WriteField( "ColorMap:COLOR[long]", ColorMap );
-        */
+        stream.WriteArrayField( "ColorArray:COLOR[]", ColorArray );
+        stream.WriteMapField( "ColorMap:COLOR[long]", ColorMap );
     }
 
     // ~~
@@ -141,14 +152,12 @@ class OBJECT
         stream.ReadField( "Integer64:long", Integer64 );
         stream.ReadField( "Real32:float", Real32 );
         stream.ReadField( "Real64:double", Real64 );
-        /*
         stream.ReadField( "Text:string", Text );
-        stream.ReadField( "TextArray:string[]", TextArray );
-        stream.ReadField( "TextMap:string[long]", TextMap );
+        stream.ReadArrayField( "TextArray:string[]", TextArray );
+        stream.ReadMapField( "TextMap:string[long]", TextMap );
         stream.ReadField( "Color:COLOR", Color );
-        stream.ReadField( "ColorArray:COLOR[]", ColorArray );
-        stream.ReadField( "ColorMap:COLOR[long]", ColorMap );
-        */
+        stream.ReadArrayField( "ColorArray:COLOR[]", ColorArray );
+        stream.ReadMapField( "ColorMap:COLOR[long]", ColorMap );
     }
 }
 
