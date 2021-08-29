@@ -162,37 +162,37 @@ class STREAM
     // ~~
 
     func WriteReal32(
-        _ real : Float32
+        _ real_ : Float32
         )
     {
         var natural : UInt32;
 
-        natural = real.bitPattern;
+        natural = real_.bitPattern;
 
-        WriteNatural8( UInt8( natural & 255 ) );
-        WriteNatural8( UInt8( ( natural >> 8 ) & 255 ) );
-        WriteNatural8( UInt8( ( natural >> 16 ) & 255 ) );
-        WriteNatural8( UInt8( ( natural >> 24 ) & 255 ) );
+        ByteArray.append( UInt8( natural & 255 ) );
+        ByteArray.append( UInt8( ( natural >> 8 ) & 255 ) );
+        ByteArray.append( UInt8( ( natural >> 16 ) & 255 ) );
+        ByteArray.append( UInt8( ( natural >> 24 ) & 255 ) );
     }
 
     // ~~
 
     func WriteReal64(
-        _ real : Float64
+        _ real_ : Float64
         )
     {
         var natural : UInt64;
 
-        natural = real.bitPattern;
+        natural = real_.bitPattern;
 
-        WriteNatural8( UInt8( natural & 255 ) );
-        WriteNatural8( UInt8( ( natural >> 8 ) & 255 ) );
-        WriteNatural8( UInt8( ( natural >> 16 ) & 255 ) );
-        WriteNatural8( UInt8( ( natural >> 24 ) & 255 ) );
-        WriteNatural8( UInt8( ( natural >> 32 ) & 255 ) );
-        WriteNatural8( UInt8( ( natural >> 40 ) & 255 ) );
-        WriteNatural8( UInt8( ( natural >> 48 ) & 255 ) );
-        WriteNatural8( UInt8( ( natural >> 56 ) & 255 ) );
+        ByteArray.append( UInt8( natural & 255 ) );
+        ByteArray.append( UInt8( ( natural >> 8 ) & 255 ) );
+        ByteArray.append( UInt8( ( natural >> 16 ) & 255 ) );
+        ByteArray.append( UInt8( ( natural >> 24 ) & 255 ) );
+        ByteArray.append( UInt8( ( natural >> 32 ) & 255 ) );
+        ByteArray.append( UInt8( ( natural >> 40 ) & 255 ) );
+        ByteArray.append( UInt8( ( natural >> 48 ) & 255 ) );
+        ByteArray.append( UInt8( ( natural >> 56 ) & 255 ) );
     }
 
     // ~~
@@ -245,10 +245,10 @@ class STREAM
         )
     {
         WriteName( field_name );
-        WriteNatural8( 0 );
-        WriteNatural8( 0 );
-        WriteNatural8( 0 );
-        WriteNatural8( 0 );
+        ByteArray.append( 0 );
+        ByteArray.append( 0 );
+        ByteArray.append( 0 );
+        ByteArray.append( 0 );
         ByteIndexArray.append( UInt64( ByteArray.count ) );
     }
 
@@ -320,7 +320,6 @@ class STREAM
         WriteFieldFooter();
     }
 
-
     // ~~
 
     func SaveFile(
@@ -343,12 +342,12 @@ class STREAM
     func ReadNatural8(
         ) -> UInt8
     {
-        var byte : UInt8;
+        var byte_ : UInt8;
 
-        byte = ByteArray[ Int( ByteIndex ) ];
+        byte_ = ByteArray[ Int( ByteIndex ) ];
         ByteIndex += 1;
 
-        return byte;
+        return byte_;
     }
 
     // ~~
@@ -687,7 +686,7 @@ func WriteByteArray(
     _ byte_array : [ UInt8 ]
     )
 {
-    print( " :TODO : WriteByteArray" );
+    print( ":TODO: WriteByteArray" );
 }
 
 // ~~
@@ -696,7 +695,7 @@ func ReadByteArray(
     _ file_path : String
     ) -> [ UInt8 ]
 {
-    print( " :TODO : ReadByteArray" );
+    print( ":TODO: ReadByteArray" );
 
     return [];
 }
