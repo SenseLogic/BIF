@@ -169,7 +169,9 @@ class CLASS_DATA
         )
     {
         writeln( "FirstStructData:STRUCT_DATA = ", FirstStructData );
+        FirstStructData.Dump();
         writeln( "SecondStructData:STRUCT_DATA = ", SecondStructData );
+        SecondStructData.Dump();
     }
 
     // -- OPERATIONS
