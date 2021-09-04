@@ -303,13 +303,37 @@ class STREAM
 
     // ~~
 
+    void WriteValue( _VALUE_ )(
+        ref _VALUE_ value
+        )
+    {
+        static if ( is( _VALUE_ : Object ) )
+        {
+            if ( value is null )
+            {
+                WriteBoolean( false );
+            }
+            else
+            {
+                WriteBoolean( true );
+                value.WriteValue( this );
+            }
+        }
+        else
+        {
+            value.WriteValue( this );
+        }
+    }
+
+    // ~~
+
     void WriteField( _VALUE_ )(
         string name,
         ref _VALUE_ value
         )
     {
         WriteFieldHeader( name );
-        value.WriteValue( this );
+        WriteValue( value );
         WriteFieldFooter();
     }
 
@@ -637,6 +661,30 @@ class STREAM
 
     // ~~
 
+    void ReadValue( _VALUE_ )(
+        ref _VALUE_ value
+        )
+    {
+        static if ( is( _VALUE_ : Object ) )
+        {
+            if ( !ReadBoolean() )
+            {
+                value = null;
+            }
+            else
+            {
+                value = new _VALUE_();
+                value.ReadValue( this );
+            }
+        }
+        else
+        {
+            value.ReadValue( this );
+        }
+    }
+
+    // ~~
+
     bool ReadField( _VALUE_ )(
         string name,
         ref _VALUE_ value
@@ -644,8 +692,8 @@ class STREAM
     {
         if ( ReadFieldHeader( name ) )
         {
-            value.ReadValue( this );
             ReadFieldFooter();
+            ReadValue( value );
 
             return true;
         }
@@ -675,12 +723,7 @@ class STREAM
 
             foreach ( value_index; 0 .. value_count )
             {
-                static if ( is( _VALUE_ == class ) )
-                {
-                    value = new _VALUE_();
-                }
-
-                value.ReadValue( this );
+                ReadValue( value );
                 value_array ~= value;
             }
 
@@ -715,19 +758,8 @@ class STREAM
 
             foreach ( value_index; 0 .. value_count )
             {
-                static if ( is( _KEY_ == class ) )
-                {
-                    key = new _KEY_();
-                }
-
-                key.ReadValue( this );
-
-                static if ( is( _VALUE_ == class ) )
-                {
-                    value = new _VALUE_();
-                }
-
-                value.ReadValue( this );
+                ReadValue( key );
+                ReadValue( value );
                 value_map[ key ] = value;
             }
 

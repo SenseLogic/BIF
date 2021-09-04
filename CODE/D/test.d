@@ -9,7 +9,7 @@ import std.conv : to;
 
 // -- TYPES
 
-class OBJECT
+struct STRUCT_DATA
 {
     // -- ATTRIBUTES
 
@@ -48,44 +48,6 @@ class OBJECT
     COLOR[ long ]
         ColorMap;
 
-    // -- CONSTRUCTORS
-
-    this(
-        )
-    {
-    }
-
-    // ~~
-
-    this(
-        long value
-        )
-    {
-        Boolean = cast( bool )( value & 1 );
-        Natural8 = cast( ubyte )value;
-        Natural16 = cast( ushort )value;
-        Natural32 = cast( uint )value;
-        Natural64 = cast( ulong )value;
-        Integer8 = cast( byte )value;
-        Integer16 = cast( short )value;
-        Integer32 = cast( int )value;
-        Integer64 = cast( long )value;
-        Real32 = cast( float )value;
-        Real64 = cast( double )value;
-        Text = value.to!string();
-        TextArray = [ value.to!string(), ( value + 1 ).to!string() ];
-        TextMap[ value ] = value.to!string();
-        TextMap[ value + 1 ] = ( value + 1 ).to!string();
-        Color.Red = cas( ubyte )value;
-        Color.Green = cast( ubyte )( value + 1 );
-        Color.Blue = cast( ubyte )( value + 2 );
-        Color.Alpha = cast( ubyte )( value + 3 );
-        ColorArray = [ Color, Color ];
-        ColorMap[ value ] = Color;
-        ColorMap[ value + 1 ] = Color;
-
-    }
-
     // -- INQUIRIES
 
     void Dump(
@@ -111,6 +73,36 @@ class OBJECT
     }
 
     // -- OPERATIONS
+
+    void Initialize(
+        long seed
+        )
+    {
+        Boolean = cast( bool )( seed & 1 );
+        Natural8 = cast( ubyte )seed;
+        Natural16 = cast( ushort )seed;
+        Natural32 = cast( uint )seed;
+        Natural64 = cast( ulong )seed;
+        Integer8 = cast( byte )seed;
+        Integer16 = cast( short )seed;
+        Integer32 = cast( int )seed;
+        Integer64 = cast( long )seed;
+        Real32 = cast( float )seed;
+        Real64 = cast( double )seed;
+        Text = seed.to!string();
+        TextArray = [ seed.to!string(), ( seed + 1 ).to!string() ];
+        TextMap[ seed ] = seed.to!string();
+        TextMap[ seed + 1 ] = ( seed + 1 ).to!string();
+        Color.Red = cast( ubyte )seed;
+        Color.Green = cast( ubyte )( seed + 1 );
+        Color.Blue = cast( ubyte )( seed + 2 );
+        Color.Alpha = cast( ubyte )( seed + 3 );
+        ColorArray = [ Color, Color ];
+        ColorMap[ seed ] = Color;
+        ColorMap[ seed + 1 ] = Color;
+    }
+
+    // ~~
 
     void WriteValue(
         STREAM stream
@@ -161,21 +153,118 @@ class OBJECT
     }
 }
 
+// ~~
+
+class CLASS_DATA
+{
+    // -- ATTRIBUTES
+
+    STRUCT_DATA
+        FirstStructData,
+        SecondStructData;
+
+    // -- INQUIRIES
+
+    void Dump(
+        )
+    {
+        writeln( "FirstStructData:STRUCT_DATA = ", FirstStructData );
+        writeln( "SecondStructData:STRUCT_DATA = ", SecondStructData );
+    }
+
+    // -- OPERATIONS
+
+    void Initialize(
+        long seed
+        )
+    {
+        FirstStructData.Initialize( seed );
+        SecondStructData.Initialize( seed );
+    }
+
+    // ~~
+
+    void WriteValue(
+        STREAM stream
+        )
+    {
+        stream.WriteField( "FirstStructData:STRUCT_DATA", FirstStructData );
+        stream.WriteField( "SecondStructData:STRUCT_DATA", SecondStructData );
+    }
+
+    // ~~
+
+    void ReadValue(
+        STREAM stream
+        )
+    {
+        stream.ReadField( "FirstStructData:STRUCT_DATA", FirstStructData );
+        stream.ReadField( "SecondStructData:STRUCT_DATA", SecondStructData );
+    }
+}
+
+// ~~
+
+class BIF_TEST
+{
+    // -- ATTRIBUTES
+
+    CLASS_DATA
+        ClassData;
+
+    // -- INQUIRIES
+
+    void Dump(
+        )
+    {
+        ClassData.Dump();
+    }
+
+    // -- OPERATIONS
+
+    void Initialize(
+        long seed
+        )
+    {
+        ClassData = new CLASS_DATA();
+        ClassData.Initialize( seed );
+    }
+
+    // ~~
+
+    void WriteValue(
+        STREAM stream
+        )
+    {
+        stream.WriteField( "ClassData:CLASS_DATA", ClassData );
+    }
+
+    // ~~
+
+    void ReadValue(
+        STREAM stream
+        )
+    {
+        stream.ReadField( "ClassData:CLASS_DATA", ClassData );
+    }
+}
+
 // -- FUNCTIONS
 
 void TestWrite(
     )
 {
-    OBJECT
-        object;
+    BIF_TEST
+        bif_test;
     STREAM
         stream;
 
-    object = new OBJECT( 50 );
+    bif_test = new BIF_TEST();
+    bif_test.Initialize( 50 );
     stream = new STREAM();
 
-    object.Dump();
-    object.WriteValue( stream );
+    bif_test.Dump();
+    bif_test.WriteValue( stream );
     stream.SaveFile( "test.bif" );
 }
 
@@ -184,17 +273,17 @@ void TestWrite(
 void TestRead(
     )
 {
-    OBJECT
-        object;
+    BIF_TEST
+        bif_test;
     STREAM
         stream;
 
-    object = new OBJECT();
+    bif_test = new BIF_TEST();
     stream = new STREAM();
 
     stream.LoadFile( "test.bif" );
-    object.ReadValue( stream );
-    object.Dump();
+    bif_test.ReadValue( stream );
+    bif_test.Dump();
 }
 
 // ~~
