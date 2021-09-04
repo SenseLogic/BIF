@@ -692,8 +692,8 @@ class STREAM
     {
         if ( ReadFieldHeader( name ) )
         {
-            ReadFieldFooter();
             ReadValue( value );
+            ReadFieldFooter();
 
             return true;
         }
