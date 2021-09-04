@@ -349,7 +349,7 @@ class STREAM
 
         foreach ( value_index; 0 .. value_array.length )
         {
-            value_array[ value_index ].WriteValue( this );
+            WriteValue( value_array[ value_index ]  );
         }
 
         WriteFieldFooter();
@@ -362,21 +362,13 @@ class STREAM
         ref _VALUE_[ _KEY_ ] value_map
         )
     {
-        _KEY_
-            written_key;
-        _VALUE_
-            written_value;
-
         WriteFieldHeader( name );
         WriteNatural64( ulong( value_map.length ) );
 
         foreach ( key, value; value_map )
         {
-            written_key = key;
-            written_key.WriteValue( this );
-
-            written_value = value;
-            written_value.WriteValue( this );
+            WriteValue( key );
+            WriteValue( value );
         }
 
         WriteFieldFooter();
