@@ -36,7 +36,11 @@ class STREAM
     string[]
         NameArray;
     ulong[ string ]
-        NameIndexDictionary;
+        NameIndexMap;
+    Object[]
+        ObjectArray;
+    ulong[ Object ]
+        ObjectIndexMap;
     STREAM_STATE[]
         StateArray;
 
@@ -49,7 +53,9 @@ class STREAM
         ByteIndex = 0;
         ByteIndexArray = null;
         NameArray = null;
-        NameIndexDictionary = null;
+        NameIndexMap = null;
+        ObjectArray = [ null ];
+        ObjectIndexMap[ null ] = 0;
         StateArray = null;
     }
 
@@ -79,7 +85,7 @@ class STREAM
         ByteIndex = 0;
         ByteIndexArray = [ 0 ];
         NameArray = null;
-        NameIndexDictionary = null;
+        NameIndexMap = null;
         StateArray = [ STREAM_STATE( ulong( byte_array.length ) ) ];
     }
 
@@ -243,7 +249,7 @@ class STREAM
         ulong
             *found_name_index;
 
-        found_name_index = name in NameIndexDictionary;
+        found_name_index = name in NameIndexMap;
 
         if ( found_name_index !is null )
         {
@@ -251,11 +257,50 @@ class STREAM
         }
         else
         {
-            NameIndexDictionary[ name ] = ulong( NameArray.length );
+            NameIndexMap[ name ] = ulong( NameArray.length );
             NameArray ~= name;
 
             WriteNatural64( ulong( name.length << 1 ) );
             ByteArray ~= cast( ubyte[] )name;
+        }
+    }
+
+    // ~~
+
+    void WriteValue( _VALUE_ )(
+        ref _VALUE_ value
+        )
+    {
+        static if ( is( _VALUE_ : Object ) )
+        {
+            ulong
+                *found_object_index;
+
+            if ( value is null )
+            {
+                WriteNatural64( 1 );
+            }
+            else
+            {
+                found_object_index = value in ObjectIndexMap;
+
+                if ( found_object_index !is null )
+                {
+                    WriteNatural64( ( *found_object_index << 1 ) | 1 );
+                }
+                else
+                {
+                    WriteNatural64( ulong( ObjectArray.length << 1 ) );
+                    ObjectIndexMap[ value ] = ulong( ObjectArray.length );
+                    ObjectArray ~= value;
+
+                    value.WriteValue( this );
+                }
+            }
+        }
+        else
+        {
+            value.WriteValue( this );
         }
     }
 
@@ -299,30 +344,6 @@ class STREAM
         byte_index = ulong( ByteIndexArray[ ByteIndexArray.length - 1 ] );
         byte_count = cast( uint )( ulong( ByteArray.length ) - byte_index );
         WriteByteCount( byte_count, byte_index - 4 );
-    }
-
-    // ~~
-
-    void WriteValue( _VALUE_ )(
-        ref _VALUE_ value
-        )
-    {
-        static if ( is( _VALUE_ : Object ) )
-        {
-            if ( value is null )
-            {
-                WriteBoolean( false );
-            }
-            else
-            {
-                WriteBoolean( true );
-                value.WriteValue( this );
-            }
-        }
-        else
-        {
-            value.WriteValue( this );
-        }
     }
 
     // ~~
@@ -568,7 +589,7 @@ class STREAM
 
             name = cast( string )byte_array;
 
-            NameIndexDictionary[ name ] = ulong( NameArray.length );
+            NameIndexMap[ name ] = ulong( NameArray.length );
             NameArray ~= name;
 
             return name;
@@ -576,6 +597,44 @@ class STREAM
         else
         {
             return NameArray[ natural >> 1 ];
+        }
+    }
+
+    // ~~
+
+    void ReadValue( _VALUE_ )(
+        ref _VALUE_ value
+        )
+    {
+        static if ( is( _VALUE_ : Object ) )
+        {
+            ulong
+                natural;
+
+            natural = ReadNatural64();
+
+            if ( natural == 1 )
+            {
+                value = null;
+            }
+            else if ( ( natural & 1 ) == 0 )
+            {
+                assert( natural >> 1 == ObjectArray.length );
+
+                value = new _VALUE_();
+                ObjectIndexMap[ value ] = ulong( ObjectArray.length );
+                ObjectArray ~= value;
+
+                value.ReadValue( this );
+            }
+            else
+            {
+                value = cast( _VALUE_ )ObjectArray[ natural >> 1 ];
+            }
+        }
+        else
+        {
+            value.ReadValue( this );
         }
     }
 
@@ -649,30 +708,6 @@ class STREAM
     {
         ByteIndex = StateArray[ StateArray.length - 1 ].PostByteIndex;
         StateArray = StateArray[ 0 .. StateArray.length - 1 ];
-    }
-
-    // ~~
-
-    void ReadValue( _VALUE_ )(
-        ref _VALUE_ value
-        )
-    {
-        static if ( is( _VALUE_ : Object ) )
-        {
-            if ( !ReadBoolean() )
-            {
-                value = null;
-            }
-            else
-            {
-                value = new _VALUE_();
-                value.ReadValue( this );
-            }
-        }
-        else
-        {
-            value.ReadValue( this );
-        }
     }
 
     // ~~

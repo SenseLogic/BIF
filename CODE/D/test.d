@@ -212,7 +212,8 @@ class BIF_TEST
     // -- ATTRIBUTES
 
     CLASS_DATA
-        ClassData;
+        ClassData,
+        NullClassData;
 
     // -- INQUIRIES
 
@@ -230,6 +231,7 @@ class BIF_TEST
     {
         ClassData = new CLASS_DATA();
         ClassData.Initialize( seed );
+        NullClassData = null;
     }
 
     // ~~
@@ -239,6 +241,7 @@ class BIF_TEST
         )
     {
         stream.WriteField( "ClassData:CLASS_DATA", ClassData );
+        stream.WriteField( "NullClassData:CLASS_DATA", NullClassData );
     }
 
     // ~~
@@ -247,7 +250,8 @@ class BIF_TEST
         STREAM stream
         )
     {
-        stream.ReadField( "ClassData:CLASS_DATA", ClassData );
+        stream.WriteField( "ClassData:CLASS_DATA", ClassData );
+        stream.WriteField( "NullClassData:CLASS_DATA", NullClassData );
     }
 }
 
